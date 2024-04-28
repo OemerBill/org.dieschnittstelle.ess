@@ -4,6 +4,9 @@ package org.dieschnittstelle.ess.basics;
 import org.dieschnittstelle.ess.basics.annotations.AnnotatedStockItemBuilder;
 import org.dieschnittstelle.ess.basics.annotations.StockItemProxyImpl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import static org.dieschnittstelle.ess.utils.Utils.*;
 
 public class ShowAnnotations {
@@ -30,6 +33,9 @@ public class ShowAnnotations {
 	 */
 	private static void showAttributes(Object instance) {
 		show("class is: " + instance.getClass());
+		Class<?> clazz = instance.getClass();
+		Field[] fields = clazz.getDeclaredFields();
+		StringBuilder stringOutput = new StringBuilder("{" + clazz.getSimpleName());
 
 		try {
 
@@ -39,6 +45,20 @@ public class ShowAnnotations {
 			//  will then be built from the field names and field values.
 			//  Note that only read-access to fields via getters or direct access
 			//  is required here.
+			for (int i = 0; i < fields.length; i++) {
+				Field field = fields[i];
+				field.setAccessible(true);
+				String fieldName = field.getName();
+				Method getter = clazz.getDeclaredMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1));
+				Object fieldValue = getter.invoke(instance);
+				stringOutput.append(" ").append(fieldName).append(":").append(fieldValue);
+				if (i < fields.length - 1) {
+					stringOutput.append(",");
+				}
+			}
+
+			stringOutput.append("}");
+			show(stringOutput.toString());
 
 			// TODO BAS3: if the new @DisplayAs annotation is present on a field,
 			//  the string representation will not use the field's name, but the name
