@@ -1,13 +1,18 @@
 package org.dieschnittstelle.ess.ser.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.logging.log4j.Logger;
 import org.dieschnittstelle.ess.entities.crm.AbstractTouchpoint;
@@ -200,34 +205,51 @@ public class ShowTouchpointService {
 		try {
 
 			// create post request for the api/touchpoints uri
+			HttpPost request = new HttpPost("http://localhost:8080/api/touchpoints");
 
 			// create an ObjectOutputStream from a ByteArrayOutputStream - the
 			// latter must be accessible via a variable
+			ByteArrayOutputStream requestBodyDataContainer = new ByteArrayOutputStream();
+			ObjectOutputStream requestBodyConverter = new ObjectOutputStream(requestBodyDataContainer);
 
 			// write the object to the output stream
+			requestBodyConverter.writeObject(tp);
 
 			// create a ByteArrayEntity and pass it the byte array from the
 			// output stream
+			ByteArrayEntity requestBody = new ByteArrayEntity(requestBodyDataContainer.toByteArray());
 
 			// set the entity on the request
+			request.setEntity(requestBody);
 
 			// execute the request, which will return a Future<HttpResponse> object
+			Future<HttpResponse> responseFuture = client.execute(request, null);
 
 			// get the response from the Future object
+			HttpResponse response = responseFuture.get();
 
 			// log the status line
+			show("got status code: " + response.getStatusLine());
 
 			// evaluate the result using getStatusLine(), use constants in
 			// HttpStatus
 
 			/* if successful: */
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				// create an object input stream using getContent() from the
+				// response entity (accessible via getEntity())
+				ObjectInputStream responseBodyConverter = new ObjectInputStream(response.getEntity().getContent());
 
-			// create an object input stream using getContent() from the
-			// response entity (accessible via getEntity())
+				// read the touchpoint object from the input stream
+				AbstractTouchpoint receivedTouchpoint = (AbstractTouchpoint) responseBodyConverter.readObject();
+				show("receivedTouchpoint: " + receivedTouchpoint);
 
-			// read the touchpoint object from the input stream
+				show(".equals(): %s, ==: %s", tp.equals(receivedTouchpoint), tp == receivedTouchpoint);
 
-			// return the object that you have read from the response
+				// return the object that you have read from the response
+				return receivedTouchpoint;
+			}
+
 			return null;
 		} catch (Exception e) {
 			logger.error("got exception: " + e, e);
