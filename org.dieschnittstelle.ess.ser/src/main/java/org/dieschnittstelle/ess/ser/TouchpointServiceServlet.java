@@ -101,7 +101,8 @@ public class TouchpointServiceServlet extends HttpServlet {
 		TouchpointCRUDExecutor crudExecutor = (TouchpointCRUDExecutor) getServletContext().getAttribute("touchpointCRUD");
 
 		try {
-			crudExecutor.deleteTouchpoint(Integer.parseInt(request.getPathInfo().split("/")[1]));
+			Long touchpointId = Long.parseLong(request.getPathInfo().substring(1));
+			crudExecutor.deleteTouchpoint(touchpointId);
 			response.setStatus(HttpServletResponse.SC_OK);
 		}catch (Exception e) {
 			throw new RuntimeException(e);
