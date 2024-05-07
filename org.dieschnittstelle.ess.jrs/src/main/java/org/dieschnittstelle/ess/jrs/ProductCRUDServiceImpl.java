@@ -52,8 +52,7 @@ public class ProductCRUDServiceImpl implements IProductCRUDService {
 
 	@Override
 	public IndividualisedProductItem readProduct(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		return  this.productCRUD.readObject(id);
 	}
 	
 }
