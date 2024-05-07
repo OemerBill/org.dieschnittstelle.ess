@@ -91,10 +91,10 @@ public class TestProductRESTService {
 
 
 	// TODO: activate this method (including the @Test annotation), for testing JRS3
-//	@Test
-//	public void f_createCampaign() {
-//		/* this is for internally testing that campaigns can be written and read via the web api - not part of the exercise */
-//		assertNotNull("campaign creation works",(Campaign)client.createCampaign(CAMPAIGN));
-//	}
+	@Test
+	public void f_createCampaign() {
+		/* this is for internally testing that campaigns can be written and read via the web api - not part of the exercise */
+		assertNotNull("campaign creation works",(Campaign)client.createCampaign(CAMPAIGN));
+	}
 
 }
