@@ -2,6 +2,7 @@ package org.dieschnittstelle.ess.jrs;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
 import org.apache.logging.log4j.Logger;
 import org.dieschnittstelle.ess.entities.GenericCRUDExecutor;
@@ -22,9 +23,9 @@ public class ProductCRUDServiceImpl implements IProductCRUDService {
 	public ProductCRUDServiceImpl(@Context ServletContext servletContext, @Context HttpServletRequest request) {
 		logger.info("<constructor>: " + servletContext + "/" + request);
 		// read out the dataAccessor
-		this.productCRUD = (GenericCRUDExecutor<IndividualisedProductItem>) servletContext.getAttribute("touchpointCRUD");
+		this.productCRUD = (GenericCRUDExecutor<IndividualisedProductItem>) servletContext.getAttribute("productCRUD");
 
-		logger.debug("read out the touchpointCRUD from the servlet context: " + this.productCRUD);
+		logger.debug("read out the productCRUD from the servlet context: " + this.productCRUD);
 	}
 
 	@Override
@@ -46,12 +47,17 @@ public class ProductCRUDServiceImpl implements IProductCRUDService {
 
 	@Override
 	public boolean deleteProduct(long id) {
-		// TODO Auto-generated method stub
-		return false;
+		return this.productCRUD.deleteObject(id);
 	}
 
 	@Override
 	public IndividualisedProductItem readProduct(long id) {
+		IndividualisedProductItem productItem = (IndividualisedProductItem) this.productCRUD.readObject(id);
+
+		if (productItem == null){
+			throw new NotFoundException("Product with id " + id + " not found");
+		}
+
 		return  this.productCRUD.readObject(id);
 	}
 	
