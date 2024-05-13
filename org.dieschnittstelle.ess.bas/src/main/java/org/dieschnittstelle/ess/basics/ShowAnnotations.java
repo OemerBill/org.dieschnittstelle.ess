@@ -2,6 +2,7 @@ package org.dieschnittstelle.ess.basics;
 
 
 import org.dieschnittstelle.ess.basics.annotations.AnnotatedStockItemBuilder;
+import org.dieschnittstelle.ess.basics.annotations.DisplayAs;
 import org.dieschnittstelle.ess.basics.annotations.StockItemProxyImpl;
 
 import java.lang.reflect.Field;
@@ -51,7 +52,15 @@ public class ShowAnnotations {
 				String fieldName = field.getName();
 				Method getter = clazz.getDeclaredMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1));
 				Object fieldValue = getter.invoke(instance);
-				stringOutput.append(" ").append(fieldName).append(":").append(fieldValue);
+
+				if (field.isAnnotationPresent(DisplayAs.class)) {
+					DisplayAs displayAsAnnotationObject = field.getAnnotation(DisplayAs.class);
+					String displayAsAnnotationValue = displayAsAnnotationObject.value();
+					stringOutput.append(" ").append(displayAsAnnotationValue).append(":").append(fieldValue);
+				} else {
+					stringOutput.append(" ").append(fieldName).append(":").append(fieldValue);
+				}
+
 				if (i < fields.length - 1) {
 					stringOutput.append(",");
 				}
