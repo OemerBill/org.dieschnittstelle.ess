@@ -54,6 +54,8 @@ public class JAXRSClientInterpreter implements InvocationHandler {
     public JAXRSClientInterpreter(Class serviceInterface,String baseurl) {
 
         // TODO: implement the constructor!
+        this.baseurl = baseurl;
+        this.serviceInterface = serviceInterface;
 
         logger.info("<constructor>: " + serviceInterface + " / " + baseurl + " / " + commonPath);
     }
