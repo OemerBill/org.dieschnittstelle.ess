@@ -54,7 +54,7 @@ public class TouchpointCRUDServiceImpl implements ITouchpointCRUDService {
 
     @Override
     public StationaryTouchpoint updateTouchpoint(long id, StationaryTouchpoint touchpoint) {
-        return null;
+        return this.touchpointCRUD.updateObject(touchpoint);
     }
 
     @Override
