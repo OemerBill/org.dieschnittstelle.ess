@@ -48,13 +48,13 @@ public class AccessRESTServiceWithInterpreter {
 
 
         // TODO: comment-in the call to delete() once this is handled by the invocation handler
-//		// 2) delete the touchpoint if there is one
-//		if (tps.size() > 0) {
-//          step();
-//			show("deleted: "
-//					+ serviceProxy.deleteTouchpoint(tps.get(0).getId()));
-//		}
-//
+		// 2) delete the touchpoint if there is one
+		if (tps.size() > 0) {
+          step();
+			show("deleted: "
+					+ serviceProxy.deleteTouchpoint(tps.get(0).getId()));
+		}
+
 //		// 3) create a new touchpoint
         step();
 

@@ -2,9 +2,11 @@ package org.dieschnittstelle.ess.wsv.interpreter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 import jakarta.ws.rs.*;
 import org.apache.http.client.methods.*;
@@ -21,6 +23,8 @@ import org.apache.http.entity.ByteArrayEntity;
 
 import org.dieschnittstelle.ess.utils.Http;
 import org.dieschnittstelle.ess.wsv.interpreter.json.JSONObjectSerialiser;
+
+import static org.dieschnittstelle.ess.utils.Utils.show;
 
 /*
  * TODO WSV1: implement this class such that the crud operations declared on ITouchpointCRUDService in .ess.wsv can be successfully called from the class AccessRESTServiceWithInterpreter in the .esa.wsv.client project
@@ -74,6 +78,10 @@ public class JAXRSClientInterpreter implements InvocationHandler {
         String requestUrl = baseurl + commonPath;
 
         // TODO: check whether we have a path annotation and append the requestUrl (path params will be handled when looking at the method arguments)
+        if (meth.isAnnotationPresent(Path.class)) {
+            Path pathAnnotation = meth.getAnnotation(Path.class);
+            requestUrl += pathAnnotation.value();
+        }
 
         // a value that needs to be sent via the http request body
         Object requestBodyData = null;
@@ -82,7 +90,17 @@ public class JAXRSClientInterpreter implements InvocationHandler {
         if (args != null && args.length > 0) {
             if (meth.getParameterAnnotations()[0].length > 0 && meth.getParameterAnnotations()[0][0].annotationType() == PathParam.class) {
                 // TODO: handle PathParam on the first argument - do not forget that in this case we might have a second argument providing a requestBodyData
+                Annotation[][] annotations = meth.getParameterAnnotations();
+                PathParam pathParam = null;
+                for (int i = 0; i < annotations.length; i++) {
+                    for (int j = 0; j < annotations[i].length; j++) {
+                        pathParam = (PathParam) annotations[i][j];
+                        show("i: %s; j: %s; annotation value: %s", i, j, pathParam.value());
+
                 // TODO: if we have a path param, we need to replace the corresponding pattern in the requestUrl with the parameter value
+                        requestUrl = requestUrl.replace("{" + pathParam.value() + "}", args[j].toString());
+                    }
+                }
             }
             else {
                 // if we do not have a path param, we assume the argument value will be sent via the body of the request
