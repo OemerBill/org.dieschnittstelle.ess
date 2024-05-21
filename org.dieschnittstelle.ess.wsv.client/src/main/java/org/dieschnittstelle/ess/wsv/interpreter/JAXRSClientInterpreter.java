@@ -95,11 +95,13 @@ public class JAXRSClientInterpreter implements InvocationHandler {
                 for (int i = 0; i < annotations.length; i++) {
                     for (int j = 0; j < annotations[i].length; j++) {
                         pathParam = (PathParam) annotations[i][j];
-                        show("i: %s; j: %s; annotation value: %s", i, j, pathParam.value());
 
                 // TODO: if we have a path param, we need to replace the corresponding pattern in the requestUrl with the parameter value
                         requestUrl = requestUrl.replace("{" + pathParam.value() + "}", args[j].toString());
                     }
+                }
+                if (args.length > 1) {
+                    requestBodyData = args[1];
                 }
             }
             else {
@@ -120,6 +122,8 @@ public class JAXRSClientInterpreter implements InvocationHandler {
             request = new HttpPut(requestUrl);
         } else if (meth.isAnnotationPresent(DELETE.class)){
             request = new HttpDelete(requestUrl);
+        } else if (meth.isAnnotationPresent(HEAD.class)) {
+            request = new HttpHead(requestUrl);
         } else {
             throw new UnsupportedOperationException("Method not implemented for " + meth.getName());
         }
