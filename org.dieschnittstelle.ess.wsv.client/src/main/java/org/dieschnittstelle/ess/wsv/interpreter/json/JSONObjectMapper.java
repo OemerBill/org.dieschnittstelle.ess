@@ -1,15 +1,12 @@
 package org.dieschnittstelle.ess.wsv.interpreter.json;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.lang.reflect.Type;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -216,8 +213,16 @@ public class JSONObjectMapper {
 				if (Modifier.isAbstract(((Class) type).getModifiers())) {
 					// TODO: include a handling for abstract classes considering
 					// the JsonTypeInfo annotation that might be set on type
-					throw new ObjectMappingException(
-							"cannot instantiate abstract class: " + type);
+					JsonTypeInfo jsonTypeInfo = (JsonTypeInfo)((Class)type).getAnnotation(JsonTypeInfo.class);
+					JsonNode classNode = json.get(jsonTypeInfo.property());
+
+					if (classNode == null || !classNode.isTextual()) {
+						throw new ObjectMappingException("Missing or invalid " + jsonTypeInfo.property() + " field for abstract class deserialization.");
+					}
+
+					Class clazz = Class.forName(classNode.asText());
+					type = clazz;
+					obj = clazz.newInstance();
 				} else {
 					obj = ((Class) type).newInstance();
 				}

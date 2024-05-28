@@ -43,7 +43,7 @@ public class AccessRESTServiceWithInterpreter {
         step();
 
         // 1) read out all touchpoints
-        List<StationaryTouchpoint> tps = serviceProxy.readAllTouchpoints();
+        List<StationaryTouchpoint> tps = (List) serviceProxy.readAllTouchpoints();
         show("read all: " + tps);
 
 
@@ -86,7 +86,7 @@ public class AccessRESTServiceWithInterpreter {
 		tp.setName("BHT WSV Mensa");
 
 
-		tp = serviceProxy.updateTouchpoint(tp.getId(), tp);
+		tp = (StationaryTouchpoint) serviceProxy.updateTouchpoint(tp.getId(), tp);
 		show("updated: " + tp);
 
     }
