@@ -13,6 +13,7 @@ import jakarta.json.bind.annotation.JsonbTypeDeserializer;
 import jakarta.json.bind.annotation.JsonbTypeSerializer;
 import jakarta.persistence.*;
 
+@Entity
 @JsonbTypeSerializer(JsonbJsonTypeInfoHandler.class)
 public class Campaign extends AbstractProduct implements Serializable {
 
@@ -23,6 +24,7 @@ public class Campaign extends AbstractProduct implements Serializable {
 	 */
 	private static final long serialVersionUID = 4407600000386810001L;
 
+	@OneToMany(cascade={CascadeType.PERSIST,CascadeType.MERGE,CascadeType.REMOVE})
 	private List<ProductBundle> bundles;
 
 	public Campaign() {

@@ -36,7 +36,7 @@ public class ProductCRUDImpl implements ProductCRUD {
 
     @Override
     public AbstractProduct updateProduct(AbstractProduct update) {
-        return null;
+        return em.merge(update);
     }
 
     @Override
@@ -46,11 +46,18 @@ public class ProductCRUDImpl implements ProductCRUD {
 
     @Override
     public boolean deleteProduct(long productID) {
-        return false;
+        AbstractProduct product = em.find(AbstractProduct.class, productID);
+        try {
+            em.remove(product);
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public List<Campaign> getCampaignsForProduct(long productID) {
-        return List.of();
+        Query query = em.createQuery("SELECT c FROM Campaign c JOIN c.bundles p WHERE p.product.id =" + productID);
+        return query.getResultList();
     }
 }
