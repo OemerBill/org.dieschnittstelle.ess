@@ -55,11 +55,17 @@ public class StockSystemImpl implements StockSystem {
     @Override
     public List<IndividualisedProductItem> getProductsOnStock(long pointOfSaleId) {
         PointOfSale pos = posCRUD.readPointOfSale(pointOfSaleId);
+
+        if(pos == null) {
+            return List.of();
+        }
+
         List<StockItem> stockItems = stockItemCRUD.readStockItemsForPointOfSale(pos);
         List<IndividualisedProductItem> products = new ArrayList<>();
         for(StockItem stockItem : stockItems) {
             products.add(stockItem.getProduct());
         }
+
         return products;
     }
 

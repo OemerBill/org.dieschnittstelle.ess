@@ -12,6 +12,8 @@ import org.dieschnittstelle.ess.utils.interceptors.Logged;
 
 import java.util.List;
 
+import static org.dieschnittstelle.ess.utils.Utils.show;
+
 @ApplicationScoped
 @Transactional
 @Logged
@@ -36,21 +38,21 @@ public class StockItemCRUDImpl implements StockItemCRUD{
 
     @Override
     public StockItem updateStockItem(StockItem item) {
-        em.merge(item);
-        return item;
+//        em.merge(item);
+//        return item;
+        return em.merge(item);
     }
 
     @Override
     public List<StockItem> readStockItemsForProduct(IndividualisedProductItem prod) {
-//        Query query = em.createQuery("SELECT si FROM StockItem si WHERE si.product.id = " + prod.getId());
-//        return query.getResultList();
-        return  List.of();
+        Query query = em.createQuery("SELECT si FROM StockItem si WHERE si.product.id = " + prod.getId());
+        return query.getResultList();
     }
 
     @Override
     public List<StockItem> readStockItemsForPointOfSale(PointOfSale pos) {
-//        Query query = em.createQuery("SELECT si FROM StockItem si WHERE si.pos.id = " + pos.getId());
-//        return query.getResultList();
-        return List.of();
+        Query query = em.createQuery("SELECT si from StockItem si where si.pos.id = " + pos.getId());
+        return query.getResultList();
+//        return List.of();
     }
 }
