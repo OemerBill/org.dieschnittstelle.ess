@@ -12,7 +12,9 @@ import org.dieschnittstelle.ess.mip.components.erp.crud.impl.StockItemCRUD;
 import org.dieschnittstelle.ess.utils.interceptors.Logged;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.dieschnittstelle.ess.utils.Utils.show;
 
@@ -57,7 +59,8 @@ public class StockSystemImpl implements StockSystem {
         PointOfSale pos = posCRUD.readPointOfSale(pointOfSaleId);
 
         if(pos == null) {
-            return List.of();
+//            return List.of();
+            return getAllProductsOnStock();
         }
 
         List<StockItem> stockItems = stockItemCRUD.readStockItemsForPointOfSale(pos);
@@ -71,15 +74,13 @@ public class StockSystemImpl implements StockSystem {
 
     @Override
     public List<IndividualisedProductItem> getAllProductsOnStock() {
-        List<PointOfSale> pos = posCRUD.readAllPointsOfSale();
-        List<IndividualisedProductItem> products = new ArrayList<>();
-        for(PointOfSale pointOfSale : pos) {
-            List<StockItem> stockItems = stockItemCRUD.readStockItemsForPointOfSale(pointOfSale);
-            for(StockItem stockItem : stockItems) {
-                products.add(stockItem.getProduct());
-            }
+        List<PointOfSale> pointOfSales = posCRUD.readAllPointsOfSale();
+        Set<IndividualisedProductItem> products = new HashSet<>();
+        for (PointOfSale pointOfSale : pointOfSales) {
+            List<IndividualisedProductItem> individualisedProductItemListPerPos = getProductsOnStock(pointOfSale.getId());
+            products.addAll(individualisedProductItemListPerPos);
         }
-        return products;
+        return new ArrayList<>(products);
     }
 
     @Override
