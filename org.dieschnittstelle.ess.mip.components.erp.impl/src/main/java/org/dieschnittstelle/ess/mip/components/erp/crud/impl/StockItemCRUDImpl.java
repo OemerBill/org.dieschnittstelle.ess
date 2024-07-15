@@ -36,16 +36,22 @@ public class StockItemCRUDImpl implements StockItemCRUD{
 
     @Override
     public StockItem updateStockItem(StockItem item) {
+//        em.merge(item);
+//        return item;
         return null;
     }
 
     @Override
     public List<StockItem> readStockItemsForProduct(IndividualisedProductItem prod) {
-        return List.of();
+//        Query query = em.createQuery("SELECT si FROM StockItem si WHERE si.product.id = " + prod.getId());
+//        return query.getResultList();
+        return  List.of();
     }
 
     @Override
     public List<StockItem> readStockItemsForPointOfSale(PointOfSale pos) {
+//        Query query = em.createQuery("SELECT si FROM StockItem si WHERE si.pos.id = " + pos.getId());
+//        return query.getResultList();
         return List.of();
     }
 }

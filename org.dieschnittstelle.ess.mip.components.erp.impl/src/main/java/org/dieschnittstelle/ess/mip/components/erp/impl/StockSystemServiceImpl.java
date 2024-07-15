@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
+import org.dieschnittstelle.ess.entities.erp.PointOfSale;
 import org.dieschnittstelle.ess.mip.components.erp.api.StockSystem;
 import org.dieschnittstelle.ess.mip.components.erp.api.StockSystemService;
 import org.dieschnittstelle.ess.mip.components.erp.crud.api.ProductCRUD;
@@ -30,21 +31,23 @@ public class StockSystemServiceImpl implements StockSystemService {
 
     @Override
     public void removeFromStock(long productId, long pointOfSaleId, int units) {
-
+        IndividualisedProductItem prod = (IndividualisedProductItem) productCRUD.readProduct(productId);
+        stockSystem.removeFromStock(prod, pointOfSaleId, units);
     }
 
     @Override
     public List<IndividualisedProductItem> getProductsOnStock(long pointOfSaleId) {
-        return List.of();
+        return stockSystem.getProductsOnStock(pointOfSaleId);
     }
 
     @Override
     public int getUnitsOnStock(long productId, long pointOfSaleId) {
-        return 0;
+        IndividualisedProductItem prod = (IndividualisedProductItem) productCRUD.readProduct(productId);
+        return stockSystem.getUnitsOnStock(prod, pointOfSaleId);
     }
 
     @Override
     public List<Long> getPointsOfSale(long productId) {
-        return List.of();
+        return stockSystem.getPointsOfSale((IndividualisedProductItem) productCRUD.readProduct(productId));
     }
 }
