@@ -9,7 +9,7 @@ import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
 
 public class StockSystemClient implements StockSystem {
 
-	private StockSystemService serviceProxy;
+	private final StockSystemService serviceProxy;
 
 	public StockSystemClient() throws Exception {
 		// TODO: remove the comments and complete the implementation

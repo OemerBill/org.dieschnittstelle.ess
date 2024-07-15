@@ -36,9 +36,8 @@ public class StockItemCRUDImpl implements StockItemCRUD{
 
     @Override
     public StockItem updateStockItem(StockItem item) {
-//        em.merge(item);
-//        return item;
-        return null;
+        em.merge(item);
+        return item;
     }
 
     @Override

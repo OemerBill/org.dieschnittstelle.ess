@@ -29,7 +29,7 @@ public interface StockSystemService {
 	 */
 	@POST
 	@Path("/remove")
-    void removeFromStock(long productId, long pointOfSaleId, int units);
+    void removeFromStock(@QueryParam("prodId") long productId, @QueryParam("posId") long pointOfSaleId, @QueryParam("units") int units);
 
 	/**
 	 * returns all products on stock or, if pointOfSaleId is specified, the products for some pointOfSale
