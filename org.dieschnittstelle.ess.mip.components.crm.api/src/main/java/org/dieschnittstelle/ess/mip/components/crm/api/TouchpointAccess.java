@@ -6,7 +6,9 @@ import org.dieschnittstelle.ess.entities.crm.AbstractTouchpoint;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+@RegisterRestClient
 @Path("/touchpoints")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})

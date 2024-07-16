@@ -7,7 +7,9 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.dieschnittstelle.ess.entities.crm.AbstractTouchpoint;
 import org.dieschnittstelle.ess.entities.crm.CampaignExecution;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+@RegisterRestClient
 @Path("/campaigns")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
