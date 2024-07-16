@@ -11,11 +11,15 @@ import org.dieschnittstelle.ess.entities.crm.CustomerTransaction;
 import org.dieschnittstelle.ess.entities.crm.CustomerTransactionShoppingCartItem;
 import org.dieschnittstelle.ess.entities.erp.AbstractProduct;
 import org.dieschnittstelle.ess.entities.erp.Campaign;
+import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
+import org.dieschnittstelle.ess.entities.erp.ProductBundle;
 import org.dieschnittstelle.ess.entities.shopping.ShoppingCartItem;
 import org.dieschnittstelle.ess.mip.components.crm.api.CampaignTracking;
 import org.dieschnittstelle.ess.mip.components.crm.api.CustomerTracking;
 import org.dieschnittstelle.ess.mip.components.crm.api.TouchpointAccess;
 import org.dieschnittstelle.ess.mip.components.crm.crud.api.CustomerCRUD;
+import org.dieschnittstelle.ess.mip.components.erp.api.StockSystem;
+import org.dieschnittstelle.ess.mip.components.erp.crud.api.ProductCRUD;
 import org.dieschnittstelle.ess.mip.components.shopping.api.PurchaseService;
 import org.dieschnittstelle.ess.mip.components.shopping.api.ShoppingException;
 import org.dieschnittstelle.ess.mip.components.shopping.cart.api.ShoppingCart;
@@ -25,6 +29,8 @@ import org.dieschnittstelle.ess.utils.interceptors.Logged;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.dieschnittstelle.ess.utils.Utils.show;
 
 @RequestScoped
 @Transactional
@@ -53,6 +59,12 @@ public class PurchaseServiceImpl implements PurchaseService {
      * the touchpoint
      */
     private AbstractTouchpoint touchpoint;
+
+    @Inject
+    private ProductCRUD productCRUD;
+
+    @Inject
+    private StockSystem stockSystem;
 
     public void setTouchpoint(AbstractTouchpoint touchpoint) {
         this.touchpoint = touchpoint;
@@ -90,7 +102,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
     }
 
-    public void purchase()  throws ShoppingException {
+    public void purchase() throws ShoppingException {
         logger.info("purchase()");
 
         if (this.customer == null || this.touchpoint == null) {
@@ -112,7 +124,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         List<ShoppingCartItem> productsInCart = this.shoppingCart.getItems();
         List<CustomerTransactionShoppingCartItem> productsInCartForTransaction = productsInCart
                 .stream()
-                .map(si -> new CustomerTransactionShoppingCartItem(si.getErpProductId(),si.getUnits(),si.isCampaign()))
+                .map(si -> new CustomerTransactionShoppingCartItem(si.getErpProductId(), si.getUnits(), si.isCampaign()))
                 .collect(Collectors.toList());
         CustomerTransaction transaction = new CustomerTransaction(this.customer, this.touchpoint,
                 productsInCartForTransaction);
@@ -131,6 +143,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         for (ShoppingCartItem item : this.shoppingCart.getItems()) {
 
             // TODO: ermitteln Sie das AbstractProduct für das gegebene ShoppingCartItem. Nutzen Sie dafür dessen erpProductId und die ProductCRUD bean
+            AbstractProduct product = productCRUD.readProduct(item.getErpProductId());
 
             if (item.isCampaign()) {
                 this.campaignTracking.purchaseCampaignAtTouchpoint(item.getErpProductId(), this.touchpoint,
@@ -143,10 +156,30 @@ public class PurchaseServiceImpl implements PurchaseService {
                 // - falls verfuegbar, aus dem Warenlager entfernen - nutzen Sie dafür die StockSystem bean
                 // (Anm.: item.getUnits() gibt Ihnen Auskunft darüber, wie oft ein Produkt, im vorliegenden Fall eine Kampagne, im
                 // Warenkorb liegt)
+                Campaign campaign = (Campaign) product;
+
+                for (ProductBundle productBundle : campaign.getBundles()) {
+                    AbstractProduct productFromBundle = productCRUD.readProduct(productBundle.getProduct().getId());
+                    int availableUnits = stockSystem.getUnitsOnStock((IndividualisedProductItem) productFromBundle, this.touchpoint.getId());
+                    int units = productBundle.getUnits() * item.getUnits();
+
+                    if (availableUnits < units) {
+                        throw new RuntimeException("Nicht genügend Einheiten auf Lager für Produkt: " + productFromBundle);
+                    }
+
+                    stockSystem.removeFromStock((IndividualisedProductItem) productFromBundle, this.touchpoint.getId(), units);
+                }
             } else {
                 // TODO: andernfalls (wenn keine Kampagne vorliegt) muessen Sie
                 // 1) das Produkt in der in item.getUnits() angegebenen Anzahl hinsichtlich Verfuegbarkeit ueberpruefen und
                 // 2) das Produkt, falls verfuegbar, in der entsprechenden Anzahl aus dem Warenlager entfernen
+
+                int availableUnits = stockSystem.getUnitsOnStock((IndividualisedProductItem) product, this.touchpoint.getId());
+                if (availableUnits < item.getUnits()) {
+                    throw new RuntimeException("Nicht genügend Einheiten auf Lager für Produkt: " + product);
+                }
+
+                stockSystem.removeFromStock((IndividualisedProductItem) product, this.touchpoint.getId(), item.getUnits());
             }
 
         }
